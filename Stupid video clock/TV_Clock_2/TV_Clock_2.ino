@@ -189,7 +189,8 @@ void displayTime() {
   TV.print(mins);
   TV.set_cursor (0, 60);
   TV.print(temp, 0);
-  TV.print(" C");
+  TV.write (94);
+  TV.print("C");
 }
 
 void drawHands () {
