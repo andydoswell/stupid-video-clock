@@ -20,6 +20,7 @@ const int monitorPwrPin = 10; // output pin controlling power to monitor.
 const int soundThreshold = 14; // level at which the monitor power is switched on
 const int monitorTime = 2; // minimum number of minutes the monitor is on
 const int runTimer = 9; // pin to enable or reset timer, controlled by Arduino 2.
+volatile unsigned int calMins;
 
 void setup() {
   attachInterrupt(clockInt, clockCounter, RISING); // start interrupt running
@@ -82,6 +83,7 @@ void clockCounter()        // Called by interrupt, driven by the crystal oscilla
   if (seconds >= 60) { // reset seconds, but preserve the "remainder" and increment minutes
     seconds -= 60;
     mins++;
+    calMins++;
     if (mins >= 60) {
       mins = 0;
     }
@@ -94,7 +96,8 @@ void transmit () { // transmit time to other Arduino
 }
 
 void transmitCal () { // transmits human readable text for calibration purposes.
-  Serial.println (mins);
+  Serial.println ();
+  Serial.print (calMins);
   Serial.print(":");
   Serial.print(seconds);
 }
