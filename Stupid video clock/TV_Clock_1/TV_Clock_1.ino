@@ -7,17 +7,17 @@
 */
 
 int clockInt = INT0; // interrupt pin from oscillator
-volatile float seconds; // floating point seconds
+volatile long timerSeconds; // floating point timerSeconds
 volatile int mins; // minutes
 unsigned int oldMins; // previous minutes used in monitor timer
-int truncatedSecs; //integer seconds
-int oldTruncatedSecs; //old integer seconds - used to initiate transmit
+int truncatedSecs; //integer timerSeconds
+int oldTruncatedSecs; //old integer timerSeconds - used to initiate transmit
 int loopCounter; // counts the loops
 unsigned int soundLevel; // level of sound used to triger monitor power
 int soundRaw; // raw output of ADC
 const int calPin = 6; // pull this pin low to enable calibration mode.
 const int monitorPwrPin = 10; // output pin controlling power to monitor.
-const int soundThreshold = 14; // level at which the monitor power is switched on
+const int soundThreshold = 10; // level at which the monitor power is switched on
 const int monitorTime = 2; // minimum number of minutes the monitor is on
 const int runTimer = 9; // pin to enable or reset timer, controlled by Arduino 2.
 volatile unsigned int calMins;
@@ -34,10 +34,17 @@ void setup() {
 void loop() {
 
   if (!digitalRead(runTimer)) {
-    seconds = 0;
+    timerSeconds = 0;
     digitalWrite(monitorPwrPin, HIGH);
   }
-
+ if (timerSeconds >= 60000) { // reset timerSeconds, but preserve the "remainder" and increment minutes
+    timerSeconds -= 60000;
+    mins++;
+    calMins++;
+    if (mins >= 60) {
+      mins = 0;
+    }
+  }
   soundRaw = analogRead (A1); // reads the sound level
   // "Software" rectifier. Changes the negative readings to positive.
   if (soundRaw <= 512) {
@@ -64,8 +71,8 @@ void loop() {
     oldMins = 0;
   }
 
-  truncatedSecs = int (seconds); // truncate seconds, we don't want to transmit floats
-  if (oldTruncatedSecs != truncatedSecs) { // transmit when seconds updated
+  truncatedSecs = int (timerSeconds/1000); // truncate timerSeconds, we don't want to transmit floats
+  if (oldTruncatedSecs != truncatedSecs) { // transmit when timerSeconds updated
     if (!digitalRead (calPin)) { // if the cal pin is low, transmit the calibration message, if not, transmit normal.
       transmitCal ();
     }
@@ -79,15 +86,7 @@ void loop() {
 
 void clockCounter()        // Called by interrupt, driven by the crystal oscillator
 {
-  seconds += 0.03563471453; // this is a shade more than 28 Hz, our crystal is old, and it doesn't divide down exactly anyway. Alter this value for calibration.
-  if (seconds >= 60) { // reset seconds, but preserve the "remainder" and increment minutes
-    seconds -= 60;
-    mins++;
-    calMins++;
-    if (mins >= 60) {
-      mins = 0;
-    }
-  }
+  timerSeconds += 35.67568203; // this number is the number of seconds multiplied by 1000 each cycle of our ocsillator increments the clock. (x1000 increases accuracy)
   return;
 }
 
@@ -99,5 +98,5 @@ void transmitCal () { // transmits human readable text for calibration purposes.
   Serial.println ();
   Serial.print (calMins);
   Serial.print(":");
-  Serial.print(seconds);
+  Serial.print(timerSeconds);
 }
