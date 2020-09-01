@@ -17,7 +17,7 @@ unsigned int soundLevel; // level of sound used to triger monitor power
 int soundRaw; // raw output of ADC
 const int calPin = 6; // pull this pin low to enable calibration mode.
 const int monitorPwrPin = 10; // output pin controlling power to monitor.
-const int soundThreshold = 10; // level at which the monitor power is switched on
+const int soundThreshold = 5; // level at which the monitor power is switched on
 const int monitorTime = 2; // minimum number of minutes the monitor is on
 const int runTimer = 9; // pin to enable or reset timer, controlled by Arduino 2.
 volatile unsigned int calMins;
@@ -86,7 +86,7 @@ void loop() {
 
 void clockCounter()        // Called by interrupt, driven by the crystal oscillator
 {
-  timerSeconds += 35.67568203; // this number is the number of seconds multiplied by 1000 each cycle of our ocsillator increments the clock. (x1000 increases accuracy)
+  timerSeconds += 35.7415453259; // this number is the number of seconds multiplied by 1000 each cycle of our ocsillator increments the clock. (x1000 increases accuracy)
   return;
 }
 
