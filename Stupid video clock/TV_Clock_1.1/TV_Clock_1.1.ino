@@ -16,12 +16,12 @@ unsigned int soundLevel; // level of sound used to triger monitor power
 int soundRaw; // raw output of ADC
 const int calPin = 6; // pull this pin low to enable calibration mode.
 const int monitorPwrPin = 10; // output pin controlling power to monitor.
-const int soundThreshold = 4; // level at which the monitor power is switched on
+const int soundThreshold = 5; // level at which the monitor power is switched on
 const int monitorTime = 2; // minimum number of minutes the monitor is on
 const int runTimer = 9; // pin to enable or reset timer, controlled by Arduino 2.
 volatile unsigned int calMins;
 float counter;
-float calFactor = 28.0639385514;// interrupt frequency in Hz 28.19161,28.3952160722
+float calFactor = 28.061154497;// interrupt frequency in Hz 28.19161,28.3952160722, 28.0639385514 , 28.0622680791larger number, slower clock
 
 void setup() {
   attachInterrupt(clockInt, clockCounter, RISING); // start interrupt running
@@ -44,6 +44,7 @@ void loop() {
     seconds ++;
     if (seconds >= 60) {
       seconds = 0;
+      mins++;
     }
   }
 
